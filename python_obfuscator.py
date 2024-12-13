@@ -3,7 +3,7 @@
 import os
 
 """CHANGE THESE VALUES"""
-my_own_file_path = "" # leave empty if not using your own file path
+my_own_file_path = r"" # leave empty if not using your own file path
 INPUT_DIR = "convert" # puts the folder in the working directory by default, not necessarily the same location as this file
 OUTPUT_DIR = "converted" # puts the folder in the working directory by default, not necessarily the same location as this file
 obfuscation_char = "⠀" # empty braille character by default, makes the "code" look funny that way - can be set to a string
@@ -11,6 +11,13 @@ obfuscation_char = "⠀" # empty braille character by default, makes the "code" 
 """DON'T CHANGE THESE VALUES"""
 dir_list = []
 SUPPORTED_FORMATS = [".py"]
+
+if os.name == "nt": # windows system
+    path_separator = "\\"
+elif os.name == "posix": # not windows system
+    path_separator = "/"
+else:
+    raise Exception("Unsupported operating system. Please tell me which operating system you use and I will try to fix this issue.")
 
 if my_own_file_path != "":
     if os.path.exists(my_own_file_path): # makes sure you're not stupid
@@ -35,10 +42,10 @@ def save_file(converted, path):
     except FileExistsError:
         pass
 
-    file = path.split("/")[-1] # grabs the file name + extension (to be used in the new file name)
+    file = path.split(f"{path_separator}")[-1] # grabs the file name + extension (to be used in the new file name)
     file_extension = file.split(".")[-1]
     file_name = file.replace(f".{file_extension}", "")
-    output_file = open(f"./{OUTPUT_DIR}/{file_name}_obfuscated.{file_extension}", "w") # creates the new file and then writes to it
+    output_file = open(f".{path_separator}{OUTPUT_DIR}{path_separator}{file_name}_obfuscated.{file_extension}", "w", encoding="utf-8") # creates the new file and then writes to it
     output_file.write(f'unobfuscated = "{converted}".replace(f"{obfuscation_char * 3} ", " ").replace(f"{obfuscation_char * 2} ", "1").replace(f"{obfuscation_char} ", "0").split(); unobfuscated = "".join(chr(int(binary, 2)) for binary in unobfuscated); exec(unobfuscated)')
     output_file.close()
 
